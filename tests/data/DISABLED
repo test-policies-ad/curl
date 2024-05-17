@@ -54,7 +54,10 @@
 # https://github.com/curl/curl/issues/380
 1801
 #
+# The following 2 tests depend on badssl certificate, which can only be
+# validated if the system has up-to-date CA certificates.
 2043
+2088
 # The CRL test doesn't work with wolfSSL
 %if wolfssl
 313

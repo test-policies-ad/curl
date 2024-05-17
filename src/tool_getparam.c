@@ -301,6 +301,7 @@ static const struct LongShort aliases[]= {
   {"ssl-auto-client-cert",       ARG_BOOL|ARG_TLS, ' ',
    C_SSL_AUTO_CLIENT_CERT},
   {"ssl-no-revoke",              ARG_BOOL|ARG_TLS, ' ', C_SSL_NO_REVOKE},
+  {"ssl-no-verify-host",         ARG_BOOL|ARG_TLS, ' ', C_SSL_NO_VERIFY_HOST},
   {"ssl-reqd",                   ARG_BOOL|ARG_TLS, ' ', C_SSL_REQD},
   {"ssl-revoke-best-effort",     ARG_BOOL|ARG_TLS, ' ',
    C_SSL_REVOKE_BEST_EFFORT},
@@ -2533,6 +2534,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = getstr(&global->ssl_sessions, nextarg, DENY_BLANK);
       else
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      break;
+    case C_SSL_NO_VERIFY_HOST:
+      config->ssl_no_verify_host = toggle;
       break;
     case C_TCP_FASTOPEN: /* --tcp-fastopen */
       config->tcp_fastopen = TRUE;
