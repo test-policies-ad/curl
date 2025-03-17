@@ -104,8 +104,6 @@
 ** Following section applies even when CURLDEBUG is not defined.
 */
 
-#undef fake_sclose
-
 #ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*
  * The following memory function replacement typedef's are COPIED from
