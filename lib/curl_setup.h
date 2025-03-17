@@ -523,10 +523,7 @@
 #define LSEEK_ERROR (off_t)-1
 #endif
 
-#ifndef CURL_FOPEN
-#define CURL_FOPEN(fname, mode) fopen(fname, mode)
-#else
-/* compatibility/convenience macro */
+#ifdef CURL_FOPEN
 #define fopen(fname, mode) CURL_FOPEN(fname, mode)
 #endif
 

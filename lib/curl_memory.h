@@ -88,6 +88,11 @@
 #undef fdopen
 #undef fclose
 
+/* restore system symbol override */
+#ifdef CURL_FOPEN
+#define fopen(fname, mode) CURL_FOPEN(fname, mode)
+#endif
+
 /* compatibility/convenience macros */
 #undef sclose
 #define sclose(x)  CURL_SCLOSE(x)
