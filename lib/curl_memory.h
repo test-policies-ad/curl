@@ -84,13 +84,13 @@
 #undef socketpair
 #endif
 
-#undef fopen
 #undef fdopen
 #undef fclose
 
 /* restore system symbol override */
+#undef fopen
 #ifdef CURL_FOPEN
-#define fopen(fname, mode) CURL_FOPEN(fname, mode)
+#define fopen(fname, mode)  CURL_FOPEN(fname, mode)
 #endif
 
 /* compatibility/convenience macros */
