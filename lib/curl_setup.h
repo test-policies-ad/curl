@@ -505,7 +505,7 @@
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
 #    define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #    define open                       curlx_win32_open
-#    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#    define CURL_FOPEN(fname,mode)     curlx_win32_fopen(fname, mode)
 #  endif
 #elif defined(__DJGPP__)
 /* Requires DJGPP 2.04 */
@@ -522,6 +522,15 @@
 #ifndef LSEEK_ERROR
 #define LSEEK_ERROR (off_t)-1
 #endif
+
+#ifndef CURL_FOPEN
+#define CURL_FOPEN(fname, mode) fopen(fname, mode)
+#else
+/* compatibility/convenience macro */
+#define fopen(fname, mode) CURL_FOPEN(fname, mode)
+#endif
+
+/* compatibility/convenience macro */
 
 #ifndef SIZEOF_TIME_T
 /* assume default size of time_t to be 32 bits */

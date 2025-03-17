@@ -398,12 +398,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  FILE *res;
-#ifdef _WIN32
-  res = curlx_win32_fopen(file, mode);
-#else
-  res = (fopen)(file, mode);
-#endif
+  FILE *res = CURL_FOPEN(file, mode);
 
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
