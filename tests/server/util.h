@@ -25,10 +25,6 @@
  ***************************************************************************/
 #include "server_setup.h"
 
-#ifndef sclose
-#define sclose(x) CURL_SCLOSE(x)
-#endif
-
 enum {
   DOCNUMBER_NOTHING    = -7,
   DOCNUMBER_QUIT       = -6,

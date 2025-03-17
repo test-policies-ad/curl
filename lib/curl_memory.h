@@ -84,11 +84,15 @@
 #undef socketpair
 #endif
 
-/* sclose is probably already defined, redefine it! */
-#undef sclose
 #undef fopen
 #undef fdopen
 #undef fclose
+
+/* compatibility/convenience macros */
+#undef sclose
+#define sclose(x)  CURL_SCLOSE(x)
+#undef fake_sclose
+#define fake_sclose(x)  Curl_nop_stmt
 
 #endif /* MEMDEBUG_NODEFINES */
 #endif /* CURLDEBUG */
