@@ -1680,11 +1680,11 @@ static ParameterError parse_location_mode(struct GlobalConfig *global,
                                           struct OperationConfig *config,
                                           const char *nextarg)
 {
-  if(!strcmp("all", nextarg))
+  if(!strcmp("keep", nextarg))
     config->followlocation = CURLFOLLOW_ALL;
-  else if(!strcmp("obey", nextarg))
+  else if(!strcmp("spec", nextarg))
     config->followlocation = CURLFOLLOW_OBEYCODE;
-  else if(!strcmp("first", nextarg))
+  else if(!strcmp("init", nextarg))
     config->followlocation = CURLFOLLOW_FIRSTONLY;
   else
     return PARAM_BAD_USE;
