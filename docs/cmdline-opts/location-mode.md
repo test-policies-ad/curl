@@ -11,7 +11,7 @@ See-also:
   - request
   - location
 Example:
-  - -X POST -L --location-mode obey $URL
+  - -X POST -L --location-mode spec $URL
 ---
 
 # `--location-mode`
