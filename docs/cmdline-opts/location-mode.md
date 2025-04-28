@@ -17,7 +17,7 @@ Example:
 # `--location-mode`
 
 Instructs curl how to do the custom request method set with --request when
-following redirects. The default mode is `all`. curl only follows redirects if
+following redirects. The default mode is `keep`. curl only follows redirects if
 instructed to do so with --location.
 
 ## keep
