@@ -163,9 +163,15 @@ jobs:
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
-          - name: openssl -O3 valgrind
-            install_packages: zlib1g-dev valgrind
-            configure: CFLAGS=-O3 --with-openssl --enable-debug
+          - name: openssl arm
+            install_packages: zlib1g-dev
+            install_steps: pytest
+            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+            image: 'ubuntu-24.04-arm'
+
+          - name: openssl -O3 libssh valgrind
+            install_packages: zlib1g-dev libssh-dev valgrind
+            configure: CFLAGS=-O3 --with-openssl --enable-debug --with-libssh
 
           - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
@@ -694,6 +700,7 @@ jobs:
         env:
           CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
+          PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
