@@ -560,8 +560,8 @@ CURLcode Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
       }
       break;
     }
-    Curl_bufq_skip(q, (size_t)chunk_written);
     *pwritten += chunk_written;
+    Curl_bufq_skip(q, chunk_written);
   }
   return result;
 }
@@ -572,11 +572,23 @@ CURLcode Curl_bufq_write_pass(struct bufq *q,
                               size_t *pwritten)
 {
   CURLcode result = CURLE_OK;
+  size_t n;
 
   *pwritten = 0;
   while(len) {
-    size_t n;
-    size_t npassed;
+    if(Curl_bufq_is_full(q)) {
+      /* try to make room in case we are full */
+      result = Curl_bufq_pass(q, writer, writer_ctx, &n);
+      if(result) {
+        if(result != CURLE_AGAIN) {
+          /* real error, fail */
+          return result;
+        }
+        /* would block, bufq is full, give up */
+        break;
+      }
+    }
+
     /* Add to bufq as much as there is room for */
     result = Curl_bufq_write(q, buf, len, &n);
     if(result) {
@@ -597,16 +609,6 @@ CURLcode Curl_bufq_write_pass(struct bufq *q,
     buf += n;
     len -= n;
     *pwritten += n;
-
-    /* Pass bufq on to the writer */
-    result = Curl_bufq_pass(q, writer, writer_ctx, &npassed);
-    if(result) {
-      if((result == CURLE_AGAIN) && *pwritten) {
-        /* we did add to bufq but could not pass, still success */
-        result = CURLE_OK;
-      }
-      return result;
-    }
   }
 
   return (!*pwritten && len) ? CURLE_AGAIN : CURLE_OK;

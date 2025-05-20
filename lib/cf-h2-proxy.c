@@ -564,6 +564,7 @@ static ssize_t on_session_send(nghttp2_session *h2,
                                 proxy_h2_nw_out_writer, cf, &nwritten);
   if(result) {
     if(result == CURLE_AGAIN) {
+      ctx->nw_out_blocked = 1;
       return NGHTTP2_ERR_WOULDBLOCK;
     }
     failf(data, "Failed sending HTTP2 data");
@@ -1331,6 +1332,8 @@ static CURLcode tunnel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
              ctx->last_stream_id < ctx->tunnel.stream_id)) {
       result = CURLE_RECV_ERROR;
     }
+    else
+      result = CURLE_AGAIN;
   }
 
   CURL_TRC_CF(data, cf, "[%d] tunnel_recv(len=%zu) -> %d, %zu",
@@ -1362,9 +1365,9 @@ static ssize_t cf_h2_proxy_recv(struct Curl_cfilter *cf,
 
   *err = tunnel_recv(cf, data, buf, len, &n);
   if(!*err) {
-    CURL_TRC_CF(data, cf, "[%d] increase window by %zd",
-                ctx->tunnel.stream_id, nread);
-    nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, (size_t)n);
+    CURL_TRC_CF(data, cf, "[%d] increase window by %zu",
+                ctx->tunnel.stream_id, n);
+    nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, n);
     nread = (ssize_t)n;
   }
 
@@ -1417,7 +1420,7 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
       nwritten = -1;
       goto out;
     }
-    nwritten = (ssize_t)n;
+    nwritten = (!*err) ? (ssize_t)n : -1;
   }
 
   if(!Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) {
