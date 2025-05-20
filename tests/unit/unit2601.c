@@ -224,6 +224,7 @@ static void check_bufq(size_t pool_spares,
         break;
     }
     result = Curl_bufq_unwrite(&q, 1);
+    fail_unless(!result, "unwrite should work");
     roffset = 0;
     while(!Curl_bufq_is_empty(&q)) {
       unsigned char rbuf[sizeof(buf)];
