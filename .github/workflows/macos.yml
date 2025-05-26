@@ -352,7 +352,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:  # implied: OpenSSL
+        config: [OpenSSL]
         compiler: [gcc-12, gcc-13, gcc-14, llvm@15, llvm@18, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
