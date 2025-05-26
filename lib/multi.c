@@ -3429,8 +3429,9 @@ void Curl_expire_ex(struct Curl_easy *data,
   Curl_splayset(&data->state.timenode, data);
   multi->timetree = Curl_splayinsert(*curr_expire, multi->timetree,
                                      &data->state.timenode);
-  CURL_TRC_M(data, "set expire[%d] in %" FMT_TIMEDIFF_T "ns",
-             id, curlx_timediff_us(set, *nowp));
+  if(data->id >= 0)
+    CURL_TRC_M(data, "set expire[%d] in %" FMT_TIMEDIFF_T "ns",
+               id, curlx_timediff_us(set, *nowp));
 }
 
 /*
