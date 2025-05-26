@@ -939,11 +939,11 @@ jobs:
           export CURL_DIRSUFFIX='${{ matrix.type }}'
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-            TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
-          fi
+          # if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+          #   TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
+          # fi
           if [ -n '${{ matrix.openssh }}' ]; then  # OpenSSH-Windows
-            TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
+            # TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
             if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
