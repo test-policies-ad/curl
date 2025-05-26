@@ -3978,7 +3978,6 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
   if(nread == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
     nread = -1;
-
   }
   else if(nread < 0) {
     *err = libssh2_session_error_to_CURLE((int)nread);
