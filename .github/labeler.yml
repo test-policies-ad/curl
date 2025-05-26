@@ -28,7 +28,7 @@ appleOS:
           - any-glob-to-all-files: "{\
               .github/workflows/macos.yml,\
               lib/config-mac.h,\
-              lib/macos*,\
+              lib/macos*\
               }"
 
 authentication:
