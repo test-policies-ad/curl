@@ -1314,8 +1314,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   int poll_cnt;
   curl_off_t total_dl = 0;
   curl_off_t total_ul = 0;
-#endif
   ssize_t snread;
+#endif
   struct curltime now;
   bool keepon = TRUE;
   char buffer[4*1024];
