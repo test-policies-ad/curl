@@ -591,7 +591,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR) {
     size_t nread;
     *err = Curl_conn_recv(data, sockindex, buffer, len, &nread);
-    return *err ? -1 : nread;
+    return *err ? -1 : (ssize_t)nread;
   }
 
   if(conn->in_buffer.eof_flag) {
