@@ -1783,9 +1783,14 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
          before we proceed */
       ssh_set_blocking(sshc->ssh_session, 0);
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-      if(sshc->sftp_aio) {
-        sftp_aio_free(sshc->sftp_aio);
-        sshc->sftp_aio = NULL;
+      if(sshc->sftp_send_aio) {
+        sftp_aio_free(sshc->sftp_send_aio);
+        sshc->sftp_send_aio = NULL;
+      }
+
+      if(sshc->sftp_recv_aio) {
+        sftp_aio_free(sshc->sftp_recv_aio);
+        sshc->sftp_recv_aio = NULL;
       }
 #endif
 
@@ -2664,24 +2669,20 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
     *err = CURLE_FAILED_INIT;
     return -1;
   }
-  /* limit the writes to the maximum specified in Section 3 of
-   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
-   */
-  if(len > 32768)
-    len = 32768;
+
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
   switch(sshc->sftp_send_state) {
     case 0:
       sftp_file_set_nonblocking(sshc->sftp_file);
       if(sftp_aio_begin_write(sshc->sftp_file, mem, len,
-                              &sshc->sftp_aio) == SSH_ERROR) {
+                              &sshc->sftp_send_aio) == SSH_ERROR) {
         *err = CURLE_SEND_ERROR;
         return -1;
       }
       sshc->sftp_send_state = 1;
       FALLTHROUGH();
     case 1:
-      nwrite = sftp_aio_wait_write(&sshc->sftp_aio);
+      nwrite = sftp_aio_wait_write(&sshc->sftp_send_aio);
       myssh_block2waitfor(conn, sshc, (nwrite == SSH_AGAIN) ? TRUE : FALSE);
       if(nwrite == SSH_AGAIN) {
         *err = CURLE_AGAIN;
@@ -2691,9 +2692,9 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
         *err = CURLE_SEND_ERROR;
         return -1;
       }
-      if(sshc->sftp_aio) {
-        sftp_aio_free(sshc->sftp_aio);
-        sshc->sftp_aio = NULL;
+      if(sshc->sftp_send_aio) {
+        sftp_aio_free(sshc->sftp_send_aio);
+        sshc->sftp_send_aio = NULL;
       }
       sshc->sftp_send_state = 0;
       return nwrite;
@@ -2702,6 +2703,17 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
       return -1;
   }
 #else
+  /*
+   * limit the writes to the maximum specified in Section 3 of
+   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
+   *
+   * libssh started applying appropriate read/write length limits
+   * internally since version 0.11.0, hence such an operation isn't
+   * needed for versions after (and including) 0.11.0.
+   */
+  if(len > 32768)
+    len = 32768;
+
   nwrite = sftp_write(sshc->sftp_file, mem, len);
 
   myssh_block2waitfor(conn, sshc, FALSE);
@@ -2742,18 +2754,31 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
 
   switch(sshc->sftp_recv_state) {
     case 0:
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      if(sftp_aio_begin_read(sshc->sftp_file, len,
+                             &sshc->sftp_recv_aio) == SSH_ERROR) {
+        *err = CURLE_RECV_ERROR;
+        return -1;
+      }
+#else
       sshc->sftp_file_index =
         sftp_async_read_begin(sshc->sftp_file, (uint32_t)len);
       if(sshc->sftp_file_index < 0) {
         *err = CURLE_RECV_ERROR;
         return -1;
       }
+#endif
 
       FALLTHROUGH();
     case 1:
       sshc->sftp_recv_state = 1;
+
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      nread = sftp_aio_wait_read(&sshc->sftp_recv_aio, mem, len);
+#else
       nread = sftp_async_read(sshc->sftp_file, mem, (uint32_t)len,
                               (uint32_t)sshc->sftp_file_index);
+#endif
 
       myssh_block2waitfor(conn, sshc, (nread == SSH_AGAIN));
 
@@ -2765,6 +2790,18 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
         *err = CURLE_RECV_ERROR;
         return -1;
       }
+
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      if(sshc->sftp_recv_aio) {
+        /*
+         * In case of success, sftp_aio_wait_read() would free
+         * sftp_recv_aio and assign it NULL, so this should
+         * never get executed. (but has been kept for safety)
+         */
+        sftp_aio_free(sshc->sftp_recv_aio);
+        sshc->sftp_recv_aio = NULL;
+      }
+#endif
 
       sshc->sftp_recv_state = 0;
       return nread;
