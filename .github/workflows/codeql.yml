@@ -28,8 +28,8 @@ jobs:
     #   - https://gh.io/using-larger-runners (GitHub.com only)
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
-    env:
-      CODEQL_EXTRACTOR_CPP_TRAP_CACHING: false
+    #env:
+    #  CODEQL_EXTRACTOR_CPP_TRAP_CACHING: false
     
     permissions:
       # required for all workflows
@@ -47,7 +47,7 @@ jobs:
       matrix:
         include:
         - language: c-cpp
-          build-mode: manual
+          build-mode: autobuild
         - language: python
           build-mode: none
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
