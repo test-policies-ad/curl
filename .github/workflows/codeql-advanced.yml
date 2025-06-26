@@ -95,7 +95,7 @@ jobs:
         sudo apt install -y libpsl-dev libssl-dev
         autoreconf -fi
         ./configure --with-openssl
-        time make V=1 -j2 -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_DOCS=ON -DCATKIN_ENABLE_TESTING=ON -DBUILD_DOCUMENTATION=ON
+        time make V=1 -j2
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
